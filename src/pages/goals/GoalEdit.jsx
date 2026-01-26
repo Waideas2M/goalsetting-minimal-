@@ -18,6 +18,8 @@ const GoalEdit = () => {
         }
         setFormData({
             title: found.title,
+            school: found.school,
+            schoolYear: found.schoolYear,
             scope: found.scope || 'Class-related',
             className: found.className || '',
             subject: found.subject || '',
@@ -55,6 +57,22 @@ const GoalEdit = () => {
             </div>
 
             <form onSubmit={handleSave} className="form-section">
+
+                {/* Context (Read-only) */}
+                <div style={{ background: '#f5f5f5', padding: '1rem', marginBottom: '1.5rem', border: '1px solid #ddd' }}>
+                    <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', color: '#777', fontWeight: 'bold', marginBottom: '0.5rem' }}>Context (Read-only)</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                            <div style={{ fontSize: '0.85rem', color: '#555' }}>School</div>
+                            <div style={{ fontWeight: 'bold' }}>{formData.school || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '0.85rem', color: '#555' }}>School Year</div>
+                            <div style={{ fontWeight: 'bold' }}>{formData.schoolYear || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="form-group">
                     <label className="form-label" htmlFor="title">Goal Title</label>
                     <input

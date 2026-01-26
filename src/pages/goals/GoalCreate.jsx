@@ -8,6 +8,8 @@ const GoalCreate = () => {
     const { addGoal } = useGoals();
 
     const [formData, setFormData] = useState({
+        school: '',
+        schoolYear: '',
         title: '',
         scope: 'Class-related',
         className: 'Grade 6',
@@ -54,8 +56,20 @@ const GoalCreate = () => {
         }));
     };
 
+    const validateContext = () => {
+        if (!formData.school || !formData.schoolYear) {
+            alert("Please select both a School and a School Year to proceed.");
+            return false;
+        }
+        return true;
+    };
+
     const createGoal = (status) => {
+        if (!validateContext()) return;
+
         const newId = addGoal({
+            school: formData.school,
+            schoolYear: formData.schoolYear,
             title: formData.title || 'Untitled Draft',
             scope: formData.scope,
             className: formData.scope === 'Class-related' ? formData.className : '',
@@ -87,8 +101,44 @@ const GoalCreate = () => {
 
             <form className="form-section">
 
+                {/* STEP 0: Context */}
+                <h3 style={{ textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.1em', color: '#888', marginBottom: '1rem', borderBottom: '1px solid #ddd', paddingBottom: '0.5rem' }}>Step 1: Context</h3>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                    <div className="form-group">
+                        <label className="form-label">School <span style={{ color: 'red' }}>*</span></label>
+                        <select
+                            name="school"
+                            className="form-select"
+                            value={formData.school}
+                            onChange={handleChange}
+                            style={{ border: !formData.school ? '2px solid #eee' : '2px solid #333' }}
+                        >
+                            <option value="">-- Choose a School --</option>
+                            <option value="Springdale Primary School">Springdale Primary School</option>
+                            <option value="Northview High">Northview High</option>
+                            <option value="Sunny Side Elementary">Sunny Side Elementary</option>
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">School Year <span style={{ color: 'red' }}>*</span></label>
+                        <select
+                            name="schoolYear"
+                            className="form-select"
+                            value={formData.schoolYear}
+                            onChange={handleChange}
+                            style={{ border: !formData.schoolYear ? '2px solid #eee' : '2px solid #333' }}
+                        >
+                            <option value="">-- Choose a Year --</option>
+                            <option value="2024–2025">2024–2025</option>
+                            <option value="2025–2026">2025–2026</option>
+                            <option value="2026–2027">2026–2027</option>
+                        </select>
+                    </div>
+                </div>
+
                 {/* STEP 1: Goal Details */}
-                <h3 style={{ borderBottom: '1px solid #ccc', paddingBottom: '0.5rem', marginBottom: '1.5rem', fontSize: '1.1rem' }}>Step 1: Goal Details</h3>
+                <h3 style={{ textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.1em', color: '#888', marginBottom: '1rem', borderBottom: '1px solid #ddd', paddingBottom: '0.5rem', marginTop: '2.5rem' }}>Step 2: Goal Details</h3>
 
                 <div className="form-group">
                     <label className="form-label">Goal Title</label>
@@ -161,7 +211,7 @@ const GoalCreate = () => {
                 </div>
 
                 {/* STEP 2: Goal Evidence (Multi-file) */}
-                <h3 style={{ borderBottom: '1px solid #ccc', paddingBottom: '0.5rem', marginBottom: '1.5rem', marginTop: '2.5rem', fontSize: '1.1rem' }}>Step 2: Attach Evidence (Goal-level)</h3>
+                <h3 style={{ textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '0.1em', color: '#888', marginBottom: '1rem', borderBottom: '1px solid #ddd', paddingBottom: '0.5rem', marginTop: '3rem' }}>Step 3: Attach Evidence (Goal-level)</h3>
 
                 <div className="form-group">
                     <label className="form-label">Baseline Documents / Plans</label>

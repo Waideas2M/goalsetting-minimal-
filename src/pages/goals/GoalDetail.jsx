@@ -6,7 +6,7 @@ import './goals.css';
 const GoalDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { goals, updateGoal, deleteGoal, duplicateGoal, archiveGoal } = useGoals();
+    const { goals, updateGoal, deleteGoal, duplicateGoal, archiveGoal, reactivateGoal } = useGoals();
     const [activeTab, setActiveTab] = useState('goal');
     const [goal, setGoal] = useState(null);
 
@@ -32,6 +32,10 @@ const GoalDetail = () => {
 
     const handleArchive = () => {
         archiveGoal(goal.id);
+    };
+
+    const handleReactivate = () => {
+        reactivateGoal(goal.id);
     };
 
     const handleEdit = () => {
@@ -123,41 +127,47 @@ const GoalDetail = () => {
     const GoalTab = () => (
         <div className="sub-view">
             <div className="info-grid">
-                <div>
+                {/* Column 1: Main Content */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     <div className="field-value">
                         <div className="field-label">Goal Title</div>
-                        <div className="field-content" style={{ fontWeight: 'bold' }}>{goal.title}</div>
-                    </div>
-                    <div className="field-value">
-                        <div className="field-label">Scope</div>
-                        <div className="field-content">{goal.scope}</div>
-                    </div>
-                    {goal.scope === 'Class-related' && (
-                        <>
-                            <div className="field-value">
-                                <div className="field-label">Class</div>
-                                <div className="field-content">{goal.className}</div>
-                            </div>
-                            <div className="field-value">
-                                <div className="field-label">Subject</div>
-                                <div className="field-content">{goal.subject}</div>
-                            </div>
-                        </>
-                    )}
-                </div>
-                <div>
-                    <div className="field-value">
-                        <div className="field-label">Period</div>
-                        <div className="field-content">{goal.period.startDate} — {goal.period.endDate}</div>
+                        <div className="field-content" style={{ fontWeight: '700', fontSize: '1.25rem' }}>{goal.title}</div>
                     </div>
                     <div className="field-value">
                         <div className="field-label">Description</div>
-                        <div className="field-content" style={{ lineHeight: '1.5' }}>{goal.description}</div>
+                        <div className="field-content" style={{ lineHeight: '1.6', fontSize: '1rem', color: '#333' }}>{goal.description}</div>
+                    </div>
+                </div>
+
+                {/* Column 2: Context Metadata */}
+                <div className="eval-card" style={{ background: '#f9f9f9', border: 'none', boxShadow: 'none' }}>
+                    <div className="eval-section-title" style={{ marginBottom: '1.5rem' }}>Core Context</div>
+                    <div className="field-meta-grid">
+                        <div className="field-value">
+                            <div className="field-label">Scope</div>
+                            <div className="field-content">{goal.scope}</div>
+                        </div>
+                        <div className="field-value">
+                            <div className="field-label">Period</div>
+                            <div className="field-content" style={{ fontSize: '0.9rem' }}>{goal.period.startDate} — {goal.period.endDate}</div>
+                        </div>
+                        {goal.scope === 'Class-related' && (
+                            <>
+                                <div className="field-value">
+                                    <div className="field-label">Class</div>
+                                    <div className="field-content">{goal.className}</div>
+                                </div>
+                                <div className="field-value">
+                                    <div className="field-label">Subject</div>
+                                    <div className="field-content">{goal.subject}</div>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
             {isEditable && (
-                <div style={{ marginTop: '2rem' }}>
+                <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
                     <button className="btn-secondary" onClick={handleEdit}>Edit Goal Details</button>
                 </div>
             )}
@@ -194,7 +204,7 @@ const GoalDetail = () => {
                             />
                         ))
                     ) : (
-                        <div style={{ color: '#999', fontStyle: 'italic', padding: '1rem 0' }}>No goal-level documents attached.</div>
+                        isEditable && <div style={{ color: '#999', fontStyle: 'italic', padding: '0.5rem 0', fontSize: '0.85rem' }}>Add initial evidence or baseline documents.</div>
                     )}
 
                     {isEditable && (
@@ -227,7 +237,7 @@ const GoalDetail = () => {
 
         return (
             <div className="sub-view">
-                <table className="activity-table" style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 1rem' }}>
+                <table className="activity-table" style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 0.5rem' }}>
                     <thead>
                         <tr>
                             <th style={{ width: '45%', borderBottom: '2px solid #ccc', paddingBottom: '0.5rem' }}>Activity</th>
@@ -284,7 +294,6 @@ const GoalDetail = () => {
                                                     onChange={(e) => updateActivity(a.id, 'plannedReviewDate', e.target.value)}
                                                     style={{ border: isEditable ? '1px solid #ddd' : 'none', color: '#555', fontSize: '0.9rem' }}
                                                 />
-                                                {isEditable && <div style={{ fontSize: '0.7rem', color: '#888', marginTop: '0.2rem' }}>When do you plan to pause and reflect on this activity?</div>}
                                             </div>
                                         ) : (
                                             <button
@@ -306,8 +315,8 @@ const GoalDetail = () => {
                                 <tr style={{ height: '0.5rem' }}></tr>
                             </React.Fragment>
                         ))}
-                        {goal.activities.length === 0 && (
-                            <tr><td colSpan="4" style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>No activities yet.</td></tr>
+                        {goal.activities.length === 0 && isEditable && (
+                            <tr><td colSpan="4" style={{ textAlign: 'center', color: '#999', padding: '1.5rem', fontSize: '0.85rem' }}>Define activities for this goal.</td></tr>
                         )}
                     </tbody>
                 </table>
@@ -412,7 +421,7 @@ const GoalDetail = () => {
                                         {f.evidence.map(e => <EvidenceListItem key={e.id} item={e} onDelete={isEditable ? (eid) => deleteFollowUpEvidence(f.id, eid) : null} />)}
                                     </div>
                                 ) : (
-                                    <div style={{ fontSize: '0.8rem', color: '#999', fontStyle: 'italic', marginBottom: '0.5rem' }}>No files attached.</div>
+                                    isEditable && <div style={{ fontSize: '0.75rem', color: '#aaa', marginBottom: '0.5rem' }}>Attach supporting evidence...</div>
                                 )}
 
                                 {isEditable && (
@@ -421,7 +430,7 @@ const GoalDetail = () => {
                             </div>
                         </div>
                     ))}
-                    {goal.followUps.length === 0 && <div style={{ marginBottom: '2rem', color: '#999' }}>No follow-ups recorded yet.</div>}
+                    {goal.followUps.length === 0 && isEditable && <div style={{ marginBottom: '1.5rem', color: '#999', fontSize: '0.85rem' }}>Record observations and follow-ups.</div>}
 
                     {isEditable && <button className="btn-secondary" onClick={addFollowUp}>Add Follow-up</button>}
                 </div>
@@ -459,49 +468,67 @@ const GoalDetail = () => {
 
         return (
             <div className="sub-view">
-                <div style={{ maxWidth: '600px' }}>
-                    <div className="eval-group">
-                        <div className="form-label">Was the goal achieved?</div>
-                        <div className="radio-options">
-                            {['Yes', 'Partly', 'No'].map(opt => (
-                                <label key={opt} className="radio-label">
-                                    <input type="radio" value={opt} checked={evalData.achieved === opt} onChange={() => handleEvalChange('achieved', opt)} disabled={!isEvalEditable} />
-                                    {opt}
-                                </label>
-                            ))}
+                <div className="eval-layout">
+                    {/* Section 1: Result Analysis */}
+                    <div className="eval-card">
+                        <div className="eval-section-title">1. Result Analysis</div>
+                        <div className="eval-group" style={{ marginBottom: '1.25rem' }}>
+                            <div className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>Was the goal achieved?</div>
+                            <div className="radio-options">
+                                {['Yes', 'Partly', 'No'].map(opt => (
+                                    <label key={opt} className="radio-label">
+                                        <input type="radio" value={opt} checked={evalData.achieved === opt} onChange={() => handleEvalChange('achieved', opt)} disabled={!isEvalEditable} />
+                                        {opt}
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="eval-group">
+                            <div className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>How well was the goal reached?</div>
+                            <textarea className="form-textarea" rows={3} value={evalData.howWell || ''} onChange={(e) => handleEvalChange('howWell', e.target.value)} disabled={!isEvalEditable} placeholder="Describe achievement..." style={{ padding: '0.75rem', fontSize: '1rem' }} />
                         </div>
                     </div>
-                    <div className="eval-group">
-                        <div className="form-label">How well was the goal reached?</div>
-                        <textarea className="form-textarea" rows={2} value={evalData.howWell || ''} onChange={(e) => handleEvalChange('howWell', e.target.value)} disabled={!isEvalEditable} />
-                    </div>
-                    <div className="eval-group">
-                        <div className="form-label">Is adjustment or a new goal needed?</div>
-                        <textarea className="form-textarea" rows={2} value={evalData.adjustmentNeeded || ''} onChange={(e) => handleEvalChange('adjustmentNeeded', e.target.value)} disabled={!isEvalEditable} />
-                    </div>
-                    <div className="eval-group">
-                        <div className="form-label">Teacher Reflection</div>
-                        <textarea className="form-textarea" rows={4} value={evalData.reflection || ''} onChange={(e) => handleEvalChange('reflection', e.target.value)} disabled={!isEvalEditable} />
+
+                    {/* Section 2: Future Planning */}
+                    <div className="eval-card">
+                        <div className="eval-section-title">2. Future Planning</div>
+                        <div className="eval-group">
+                            <div className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.5rem' }}>Is adjustment or a new goal needed?</div>
+                            <textarea className="form-textarea" rows={6} value={evalData.adjustmentNeeded || ''} onChange={(e) => handleEvalChange('adjustmentNeeded', e.target.value)} disabled={!isEvalEditable} placeholder="Next steps..." style={{ padding: '0.75rem', fontSize: '1rem' }} />
+                        </div>
                     </div>
 
-                    <div className="eval-group">
-                        <div className="form-label">Supporting Evidence</div>
-                        {(evalData.evidence && evalData.evidence.length > 0) ? (
-                            <div style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
-                                {evalData.evidence.map(e => <EvidenceListItem key={e.id} item={e} onDelete={isEvalEditable ? deleteEvalEvidence : null} />)}
-                            </div>
-                        ) : <div style={{ fontSize: '0.8rem', color: '#999', fontStyle: 'italic', marginBottom: '0.5rem' }}>No files attached.</div>}
-
-                        {isEvalEditable && <AddEvidenceInput onAdd={addEvalEvidence} label="+ Attach File" />}
+                    {/* Section 3: Deep Reflection (Full Width) */}
+                    <div className="eval-card eval-full-width">
+                        <div className="eval-section-title">3. Teacher Reflection</div>
+                        <div className="eval-group">
+                            <textarea className="form-textarea" rows={4} value={evalData.reflection || ''} onChange={(e) => handleEvalChange('reflection', e.target.value)} disabled={!isEvalEditable} placeholder="What did you learn from this process?" style={{ padding: '0.75rem', fontSize: '1rem' }} />
+                        </div>
                     </div>
 
-                    {isEvalEditable && (
-                        <button className="btn-primary" onClick={saveEvaluation}>
-                            {goal.status === 'Completed' ? 'Update Evaluation' : 'Save Evaluation & Complete Goal'}
-                        </button>
-                    )}
-                    <div style={{ height: '50px' }}></div>
+                    {/* Section 4: Evidence (Full Width) */}
+                    <div className="eval-card eval-full-width">
+                        <div className="eval-section-title">4. Final Evidence</div>
+                        <div className="eval-group">
+                            {(evalData.evidence && evalData.evidence.length > 0) ? (
+                                <div style={{ marginBottom: '1rem' }}>
+                                    {evalData.evidence.map(e => <EvidenceListItem key={e.id} item={e} onDelete={isEvalEditable ? deleteEvalEvidence : null} />)}
+                                </div>
+                            ) : isEvalEditable && <div style={{ fontSize: '0.8rem', color: '#aaa', marginBottom: '1rem' }}>Attach final summative evidence...</div>}
+
+                            {isEvalEditable && <AddEvidenceInput onAdd={addEvalEvidence} label="+ Attach Summative File" />}
+                        </div>
+                    </div>
                 </div>
+
+                {isEvalEditable && (
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem', gap: '1rem' }}>
+                        <button className="btn-primary" onClick={saveEvaluation} style={{ padding: '0.8rem 2.5rem' }}>
+                            {goal.status === 'Completed' ? 'Update Evaluation' : 'Finalize & Complete Goal'}
+                        </button>
+                    </div>
+                )}
+                <div style={{ height: '40px' }}></div>
             </div>
         );
     };
@@ -512,18 +539,39 @@ const GoalDetail = () => {
 
             <div className="detail-header">
                 <div>
-                    <h1 className="goals-title">{goal.title}</h1>
-                    <div className="detail-meta">
-                        <span>{goal.scope}</span>
-                        <span>{goal.period.startDate} — {goal.period.endDate}</span>
+                    <h1 className="goals-title" style={{ marginBottom: '0.75rem' }}>{goal.title}</h1>
+
+                    <div className="detail-context-row">
+                        <span style={{ fontWeight: '700' }}>{goal.school}</span>
+                        <span className="context-separator">|</span>
+                        <span>{goal.schoolYear}</span>
+                        <span className="context-separator">|</span>
+                        <span className="detail-scope-tag">{goal.scope}</span>
+                    </div>
+
+                    <div className="detail-meta-row">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            <span style={{ fontSize: '1.1rem', opacity: 0.7 }}>🗓</span>
+                            {goal.period.startDate} — {goal.period.endDate}
+                        </div>
                         <span className={`status-badge status-${goal.status}`}>{goal.status}</span>
                     </div>
                 </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    {isEditable && <button className="btn-secondary" onClick={handleEdit}>Edit</button>}
-                    <button className="btn-secondary" onClick={handleDuplicate}>Duplicate</button>
-                    {!isArchived && <button className="btn-secondary" onClick={handleArchive}>Archive</button>}
-                    {(isCompleted || isArchived) && <button className="btn-secondary" onClick={handleExport}>Export Report</button>}
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    {isArchived ? (
+                        <button className="btn-primary" onClick={handleReactivate} style={{ background: '#000', color: '#fff' }}>
+                            Re-activate goal
+                        </button>
+                    ) : (
+                        <>
+                            {isEditable && <button className="btn-secondary" onClick={handleEdit}>Edit</button>}
+                            <button className="btn-secondary" onClick={handleDuplicate}>Duplicate</button>
+                            <button className="btn-secondary" onClick={handleArchive}>Archive</button>
+                        </>
+                    )}
+                    <button className="btn-primary" onClick={handleExport} style={{ marginLeft: '0.5rem' }}>
+                        Export Report
+                    </button>
                 </div>
             </div>
 
