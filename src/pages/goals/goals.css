@@ -1,0 +1,309 @@
+/* Goals Module Styles - Low Fidelity / Wireframe */
+:root {
+    --wf-border: 2px solid #333;
+    --wf-bg: #fff;
+    --wf-text: #000;
+    --wf-gray: #f5f5f5;
+    --wf-active: #eee;
+}
+
+body {
+    background-color: white;
+    color: black;
+}
+
+.goals-container {
+    padding: 2rem;
+    max-width: 1000px;
+    /* Wider for table */
+    margin: 0 auto;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: black;
+}
+
+/* Header */
+.goals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: var(--wf-border);
+    padding-bottom: 1rem;
+}
+
+.goals-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: black;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Buttons */
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+    background: white;
+    color: black;
+    padding: 0.5rem 1rem;
+    border: var(--wf-border);
+    text-decoration: none;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s;
+    font-size: 0.9rem;
+}
+
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-danger:hover {
+    background: black;
+    color: white;
+}
+
+.btn-secondary {
+    border: 2px solid #999;
+    color: #555;
+}
+
+.btn-secondary:hover {
+    background: #999;
+    color: white;
+}
+
+/* Filters */
+.filters-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+
+.filter-select {
+    padding: 0.4rem;
+    border: var(--wf-border);
+    background: white;
+    font-family: inherit;
+    font-weight: 500;
+}
+
+/* Table */
+.goals-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: var(--wf-border);
+}
+
+.goals-table th,
+.goals-table td {
+    border: 1px solid #333;
+    padding: 0.75rem;
+    text-align: left;
+}
+
+.goals-table th {
+    background: #eee;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.goals-table tr:hover {
+    background: #f9f9f9;
+    cursor: pointer;
+}
+
+/* Forms */
+.form-section {
+    border: var(--wf-border);
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: var(--wf-border);
+    box-sizing: border-box;
+    font-family: inherit;
+    border-radius: 0;
+    background: white;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: 2px solid #000;
+    background: #fff;
+}
+
+/* Detail View */
+.detail-header {
+    margin-bottom: 2rem;
+}
+
+.detail-meta {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid black;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-Draft {
+    background: #eee;
+}
+
+.status-Active {
+    background: white;
+    border-color: black;
+}
+
+.status-Completed {
+    background: black;
+    color: white;
+}
+
+.status-Archived {
+    background: #ccc;
+    color: #555;
+    border-color: #999;
+}
+
+/* Tabs */
+.tabs-nav {
+    display: flex;
+    border-bottom: var(--wf-border);
+    margin-bottom: 2rem;
+}
+
+.tab-btn {
+    padding: 1rem 2rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    border-right: 1px solid #ccc;
+}
+
+.tab-btn.active {
+    background: black;
+    color: white;
+}
+
+.tab-btn:hover:not(.active) {
+    background: #eee;
+}
+
+/* Sub-views */
+.sub-view {
+    border: 1px solid #ccc;
+    padding: 1.5rem;
+    min-height: 300px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.field-value {
+    margin-bottom: 1.5rem;
+}
+
+.field-label {
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #777;
+    margin-bottom: 0.25rem;
+}
+
+.field-content {
+    font-size: 1.1rem;
+}
+
+/* Activity Table */
+.activity-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.activity-table th {
+    border-bottom: 2px solid black;
+    text-align: left;
+    padding: 0.5rem;
+}
+
+.activity-table td {
+    border-bottom: 1px solid #ccc;
+    padding: 0.5rem;
+}
+
+/* Timeline/Follow-up */
+.timeline-item {
+    border-left: 2px solid black;
+    padding-left: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.timeline-item::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: black;
+    position: absolute;
+    left: -6px;
+    top: 5px;
+}
+
+/* Evaluation */
+.eval-group {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+}
+
+.radio-options {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
