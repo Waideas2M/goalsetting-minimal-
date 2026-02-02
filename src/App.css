@@ -1,7 +1,5 @@
-/* Reseting default Vite styles */
-#root {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  text-align: left;
+/* Resets for App */
+.app-main {
+  min-height: 100vh;
+  background-color: #f9f9f9;
 }
