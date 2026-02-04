@@ -1,25 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useGoals, MOCK_USERS, SCHOOLS, SCHOOL_YEARS, DATA_BASIS_OPTIONS } from '../../../context/GoalsContext';
+import { useGoals, SCHOOLS, SCHOOL_YEARS } from '../../../context/GoalsContext';
 import V3PageLayout from './V3PageLayout';
 import GoalStatusModal from '../../../components/GoalStatusModal';
 import EvidenceUploadModal from '../../../components/EvidenceUploadModal';
-import EvidenceChartModal from '../../../components/EvidenceChartModal';
 import EvidenceList from '../../../components/EvidenceList';
 import '../goals.css';
-
-const HAS_SKOLANALYS_ACCESS = true;
 
 const GoalEditV3 = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { goals, updateGoal, canEditGoal, reopenGoal, addEvidence, removeEvidence } = useGoals();
+    const { goals, updateGoal, deleteGoal, canEditGoal, reopenGoal, addEvidence, removeEvidence } = useGoals();
     const [formData, setFormData] = useState(null);
     const [showModal, setShowModal] = useState(false);
-
-    // Evidence Modal State
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-    const [isChartModalOpen, setIsChartModalOpen] = useState(false);
+    const textareaRef = useRef(null);
 
     const goal = goals.find(g => g.id === id);
 
@@ -27,18 +22,20 @@ const GoalEditV3 = () => {
         if (goal) {
             setFormData({
                 title: goal.title,
-                goalLead: goal.goalLead || '',
-                improvementFocus: goal.improvementFocus,
-                dataBasis: Array.isArray(goal.dataBasis) ? goal.dataBasis : [],
-                scope: goal.scope,
-                className: goal.className,
                 school: goal.school || '',
                 schoolYear: goal.schoolYear || '',
-                intendedDirection: goal.intendedDirection,
-                description: goal.description
+                description: goal.description || ''
             });
         }
     }, [goal]);
+
+    // Auto-grow textarea effect
+    useEffect(() => {
+        if (textareaRef.current && formData) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+        }
+    }, [formData?.description]);
 
     if (!goal || !formData) {
         return <V3PageLayout title="Edit Goal">Loading...</V3PageLayout>;
@@ -53,13 +50,13 @@ const GoalEditV3 = () => {
         e.preventDefault();
         if (!allowedToEdit) return;
 
-        if (!formData.title || !formData.improvementFocus || !formData.school || !formData.schoolYear || formData.dataBasis.length === 0) {
-            alert('Please fill in required fields:\n- Goal Title\n- School\n- School Year\n- Improvement Focus\n- At least one Data Basis option');
+        if (!formData.title || !formData.school || !formData.schoolYear) {
+            alert('Please fill in required fields (Title, School, School Year).');
             return;
         }
 
         updateGoal(id, formData);
-        navigate(`/goals/${id}/overview`);
+        navigate(`/goals/${id}`);
     };
 
     const handleChange = (e) => {
@@ -67,37 +64,23 @@ const GoalEditV3 = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleDataBasisChange = (option) => {
-        setFormData(prev => {
-            const current = [...prev.dataBasis];
-            if (current.includes(option)) {
-                return { ...prev, dataBasis: current.filter(o => o !== option) };
-            } else {
-                return { ...prev, dataBasis: [...current, option] };
-            }
-        });
-    };
-
     const handleReopen = () => {
         reopenGoal(id);
         setShowModal(false);
     };
 
-    // Filter for baseline evidence for this goal
-    const baselineEvidence = (goal.evidence || []).filter(e => e.contextType === 'goal' && e.phase === 'baseline');
+    const attachments = goal.evidence || [];
 
     const handleAddEvidence = (evData) => {
         addEvidence(id, {
             ...evData,
-            phase: 'baseline',
             contextType: 'goal',
         });
     };
 
-    // If Closed or Archived, show the blocking view
     if (isClosed || isArchived) {
         return (
-            <V3PageLayout title={goal.title} backLink={`/goals/${id}/overview`}>
+            <V3PageLayout title={goal.title} backLink={`/goals/${id}`}>
                 <div style={{
                     padding: '3rem',
                     textAlign: 'center',
@@ -121,7 +104,7 @@ const GoalEditV3 = () => {
                                 Reopen goal
                             </button>
                         )}
-                        <button className="btn-secondary" onClick={() => navigate(`/goals/${id}/overview`)}>
+                        <button className="btn-secondary" onClick={() => navigate(`/goals/${id}`)}>
                             Cancel
                         </button>
                     </div>
@@ -137,17 +120,17 @@ const GoalEditV3 = () => {
     }
 
     return (
-        <V3PageLayout title={goal.title} backLink={`/goals/${id}/overview`}>
+        <V3PageLayout title={goal.title} backLink={`/goals/${id}`}>
             {isActive && (
                 <div style={{ padding: '1rem', background: '#fff9e6', border: '1px solid #ffeeba', borderRadius: '4px', marginBottom: '2rem', color: '#856404', fontSize: '0.9rem' }}>
                     <strong>Warning:</strong> This goal is active. Changes should clarify, not redefine the goal.
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="form-container">
+            <form onSubmit={handleSubmit} className="form-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
                 <div className="form-section" style={{ border: 'none', padding: 0 }}>
-                    <div className="form-group">
-                        <label className="form-label">Goal Title *</label>
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <label className="form-label" style={{ fontWeight: '500', color: '#444' }}>Goal Title *</label>
                         <input
                             type="text"
                             name="title"
@@ -155,22 +138,20 @@ const GoalEditV3 = () => {
                             value={formData.title}
                             onChange={handleChange}
                             required
+                            style={{ border: '1px solid #e0e0e0', borderRadius: '6px', padding: '0.75rem' }}
                         />
                     </div>
 
-                    <div className="section-header" style={{ marginTop: '1.5rem', marginBottom: '1rem', fontWeight: 'bold', color: '#555', fontSize: '0.85rem', textTransform: 'uppercase' }}>
-                        Context & Ownership
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                        <div className="form-group" style={{ flex: 2 }}>
-                            <label className="form-label">School *</label>
+                    <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                        <div className="form-group" style={{ flex: 1 }}>
+                            <label className="form-label" style={{ fontWeight: '500', color: '#444' }}>School *</label>
                             <select
                                 name="school"
                                 className="form-select"
                                 value={formData.school}
                                 onChange={handleChange}
                                 required
+                                style={{ border: '1px solid #e0e0e0', borderRadius: '6px', padding: '0.75rem' }}
                             >
                                 <option value="">Select school...</option>
                                 {SCHOOLS.map(s => (
@@ -179,7 +160,7 @@ const GoalEditV3 = () => {
                             </select>
                         </div>
                         <div className="form-group" style={{ flex: 1 }}>
-                            <label className="form-label">School Year *</label>
+                            <label className="form-label" style={{ fontWeight: '500', color: '#444' }}>School Year *</label>
                             <select
                                 name="schoolYear"
                                 className="form-select"
@@ -187,149 +168,77 @@ const GoalEditV3 = () => {
                                 onChange={handleChange}
                                 required
                                 disabled={goal.status !== 'Draft'}
-                                style={goal.status !== 'Draft' ? { background: '#f5f5f5', cursor: 'not-allowed' } : {}}
+                                style={{
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: '6px',
+                                    padding: '0.75rem',
+                                    background: goal.status !== 'Draft' ? '#f5f5f5' : '#fff',
+                                    cursor: goal.status !== 'Draft' ? 'not-allowed' : 'default'
+                                }}
                             >
                                 <option value="">Select year...</option>
                                 {SCHOOL_YEARS.map(y => (
                                     <option key={y} value={y}>{y}</option>
                                 ))}
                             </select>
-                            {goal.status !== 'Draft' && <small style={{ color: '#999' }}>Locked for active goals</small>}
                         </div>
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">Goal lead</label>
-                        <select
-                            name="goalLead"
-                            className="form-select"
-                            value={formData.goalLead}
-                            onChange={handleChange}
-                        >
-                            <option value="">Select a goal lead...</option>
-                            {MOCK_USERS.map(user => (
-                                <option key={user.id} value={user.id}>{user.name}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Improvement Focus *</label>
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                        <label className="form-label" style={{ fontWeight: '500', color: '#444' }}>Description (Optional)</label>
                         <textarea
-                            name="improvementFocus"
+                            ref={textareaRef}
+                            name="description"
                             className="form-textarea"
-                            rows="4"
-                            value={formData.improvementFocus}
+                            rows="1"
+                            value={formData.description}
                             onChange={handleChange}
-                            required
+                            style={{
+                                border: '1px solid #e0e0e0',
+                                borderRadius: '6px',
+                                padding: '0.75rem',
+                                minHeight: '44px',
+                                resize: 'none',
+                                overflow: 'hidden'
+                            }}
                         />
-                    </div>
-
-                    <div className="section-header" style={{ marginTop: '2rem', marginBottom: '1rem', fontWeight: 'bold', color: '#555', fontSize: '0.85rem', textTransform: 'uppercase' }}>
-                        Evidence Foundation
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Data Basis (Select at least one) *</label>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem', marginTop: '0.5rem' }}>
-                            {DATA_BASIS_OPTIONS.map(option => (
-                                <label key={option} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.9rem' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.dataBasis.includes(option)}
-                                        onChange={() => handleDataBasisChange(option)}
-                                    />
-                                    {option}
-                                </label>
-                            ))}
-                        </div>
                     </div>
 
                     <div className="form-group" style={{ marginBottom: '2rem' }}>
-                        <label className="form-label">Baseline Evidence (Optional)</label>
-                        <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '1rem' }}>
-                            Attach baseline data, assessment reports, or diagnostic charts that define the starting point.
-                        </p>
-
-                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                            <button
-                                type="button"
-                                className="btn-secondary"
-                                onClick={() => setIsUploadModalOpen(true)}
-                                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                            >
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-                                Attach files
-                            </button>
-                            {HAS_SKOLANALYS_ACCESS && (
-                                <button
-                                    type="button"
-                                    className="btn-secondary"
-                                    onClick={() => setIsChartModalOpen(true)}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                                >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                                    Add charts from Skolanalys
-                                </button>
-                            )}
-                        </div>
-
+                        <label className="form-label" style={{ fontWeight: '500', color: '#444', display: 'block', marginBottom: '0.75rem' }}>Attachments (Optional)</label>
                         <EvidenceList
-                            evidence={baselineEvidence}
-                            allowedToAdd={false}
+                            evidence={attachments}
+                            allowedToAdd={true}
+                            onAdd={() => setIsUploadModalOpen(true)}
                             onRemove={(evId) => removeEvidence(id, evId)}
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Scope / Context (Optional)</label>
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <select
-                                name="scope"
-                                className="form-select"
-                                style={{ flex: 1 }}
-                                value={formData.scope}
-                                onChange={handleChange}
-                            >
-                                <option value="">Select scope...</option>
-                                <option value="Class-related">Class-related</option>
-                                <option value="Individual">Individual</option>
-                                <option value="Organization">Organization</option>
-                                <option value="General">General</option>
-                            </select>
-                            {formData.scope === 'Class-related' && (
-                                <input
-                                    type="text"
-                                    name="className"
-                                    className="form-input"
-                                    style={{ flex: 1 }}
-                                    placeholder="Class name"
-                                    value={formData.className}
-                                    onChange={handleChange}
-                                />
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label">Intended Direction (Optional)</label>
-                        <textarea
-                            name="intendedDirection"
-                            className="form-textarea"
-                            rows="3"
-                            value={formData.intendedDirection}
-                            onChange={handleChange}
                         />
                     </div>
                 </div>
 
-                <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
-                    <button type="submit" className="btn-primary">
-                        Save changes
-                    </button>
-                    <button type="button" className="btn-secondary" onClick={() => navigate(`/goals/${id}/overview`)}>
-                        Cancel
-                    </button>
+                <div style={{ marginTop: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: '1.5rem' }}>
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button type="submit" className="btn-primary" style={{ padding: '0.75rem 2rem', borderRadius: '6px', fontWeight: '600' }}>
+                            Save changes
+                        </button>
+                        <button type="button" className="btn-secondary" onClick={() => navigate(`/goals/${id}`)} style={{ padding: '0.75rem 2.1rem', borderRadius: '6px', border: 'none', background: 'transparent' }}>
+                            Cancel
+                        </button>
+                    </div>
+
+                    {!isArchived && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (window.confirm("ARE YOU SURE? This will permanently delete the goal and all its data. This action cannot be undone.")) {
+                                    deleteGoal(id);
+                                    navigate('/goals');
+                                }
+                            }}
+                            style={{ color: '#dc3545', background: 'none', border: 'none', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.04em' }}
+                        >
+                            Delete Goal
+                        </button>
+                    )}
                 </div>
             </form>
 
@@ -338,15 +247,7 @@ const GoalEditV3 = () => {
                 onClose={() => setIsUploadModalOpen(false)}
                 onAdd={handleAddEvidence}
                 contextType="goal"
-                contextId="new"
-            />
-
-            <EvidenceChartModal
-                isOpen={isChartModalOpen}
-                onClose={() => setIsChartModalOpen(false)}
-                onAdd={handleAddEvidence}
-                contextType="goal"
-                contextId="new"
+                contextId={id}
             />
         </V3PageLayout>
     );
