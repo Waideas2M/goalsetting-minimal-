@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useGoals } from '../../context/GoalsContext';
-import GoalVersionSwitch from '../../components/GoalVersionSwitch';
 import './goals.css';
 
 const GoalsListV1 = () => {
@@ -10,7 +9,9 @@ const GoalsListV1 = () => {
 
     const [filterStatus, setFilterStatus] = useState('All');
 
+    // Filter to show only V1 goals
     const filteredGoals = goals.filter(goal => {
+        if (goal.version !== 'V1') return false;
         if (filterStatus !== 'All' && goal.status !== filterStatus) return false;
         return true;
     });
@@ -18,10 +19,7 @@ const GoalsListV1 = () => {
     return (
         <div className="goals-container">
             <div className="goals-header">
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <h1 className="goals-title">GOALS</h1>
-                    <GoalVersionSwitch />
-                </div>
+                <h1 className="goals-title">GOALS</h1>
                 <Link to="/goals/new" className="btn-primary">
                     + Create new goal
                 </Link>

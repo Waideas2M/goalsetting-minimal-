@@ -391,8 +391,9 @@ const initialGoals = [
 
 export const GoalsProvider = ({ children }) => {
     const [goals, setGoals] = useState(initialGoals);
-    const [version, setVersion] = useState('V2');
-    const [isV1Unlocked, setIsV1Unlocked] = useState(false);
+    const [version, setVersion] = useState('V3');
+    // V1 and V2 are now always available for comparison
+    const [isV1Unlocked, setIsV1Unlocked] = useState(true);
 
     const addGoal = (goalData) => {
         const newGoal = {

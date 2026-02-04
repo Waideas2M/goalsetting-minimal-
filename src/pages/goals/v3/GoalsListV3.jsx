@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useGoals, SCHOOLS, SCHOOL_YEARS } from '../../../context/GoalsContext';
 import '../goals.css';
 
-const GoalsListV2 = () => {
+const GoalsListV3 = () => {
     const { goals } = useGoals();
     const navigate = useNavigate();
 
@@ -11,7 +11,7 @@ const GoalsListV2 = () => {
     const [schoolFilter, setSchoolFilter] = React.useState('All');
     const [yearFilter, setYearFilter] = React.useState('All');
 
-    // Filter to show only V2 goals and apply user filters
+    // Filter to show only V2 goals (V3 is a copy of V2 for comparison iteration)
     const filteredGoals = goals.filter(goal => {
         if (goal.version !== 'V2') return false;
         if (statusFilter !== 'All' && goal.status !== statusFilter) return false;
@@ -85,4 +85,4 @@ const GoalsListV2 = () => {
     );
 };
 
-export default GoalsListV2;
+export default GoalsListV3;
